@@ -20,8 +20,6 @@ __email__ = "suryasoni@gmail.com"
 __status__ = "Development"
 
 class ListPrinter:
-
-
     def __init__(self, args):
         self.args = args
 
@@ -39,11 +37,8 @@ class ListPrinter:
                 print(prefix + ('\n' + prefix).join(obj))
 
 class DB:
-
-
     def __init__(self, create, insert, debug=False):
         name = 'db.sdb' if debug else ':memory:'
-        #name = ':memory:'
         self.conn = sqlite3.connect(name)
         self.conn.text_factory = str
         self.create = create
