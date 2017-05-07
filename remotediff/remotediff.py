@@ -12,7 +12,7 @@ import sys
 from pprint import pprint as pp
 
 __author__ = "Sury Prakash Soni"
-__copyright__ = "Copyright 2013"
+__copyright__ = "Copyright 2017"
 __license__ = "MIT"
 __version__ = "0.1.dev"
 __maintainer__ = "Sury Prakash Soni"
@@ -52,16 +52,16 @@ class DB:
 
     def _only(self, A, B):
         sql = '''
-            select 
-                path 
-            from 
-                {0} 
-            where 
+            select
+                path
+            from
+                {0}
+            where
                 path not in (select path from {1})'''.format(A, B)
         c = self.conn.cursor()
         c.execute(sql)
         return [d[0] for d in c.fetchall()]
-    
+
     def only_a(self):
         return self._only('A', 'B')
 
@@ -70,11 +70,11 @@ class DB:
 
     def _common(self, filter='1'):
         sql = '''
-            select 
-                A.path 
-            from 
-                A,B 
-            where 
+            select
+                A.path
+            from
+                A,B
+            where
                 A.path = B.path and ({0})'''.format(filter)
         c = self.conn.cursor()
         c.execute(sql)
@@ -110,13 +110,13 @@ def get_data(src):
         p = line.split('\t')
         try:
             return {
-                'path':p[0], 'ft':p[1], 'usr':p[2], 'grp':p[3], 'perm':p[4], 
+                'path':p[0], 'ft':p[1], 'usr':p[2], 'grp':p[3], 'perm':p[4],
                 'sz':p[5]
             }
         except:
             pp(line)
             raise
-    
+
     try:
         data = subprocess.check_output(cmd, shell=True)
     except subprocess.CalledProcessError as e:
@@ -130,17 +130,17 @@ def diff(args):
     lp = ListPrinter(args)
 
     create = '''
-        create table {0} 
+        create table {0}
         (
-            path varchar(255), 
-            ft varchar(2), 
-            usr varchar(50), 
-            grp varchar(50), 
-            perm varchar(5), 
+            path varchar(255),
+            ft varchar(2),
+            usr varchar(50),
+            grp varchar(50),
+            perm varchar(5),
             sz varchar(50)
         );'''
     insert = 'insert into {0} values (:path,:ft,:usr,:grp,:perm,:sz);'
-    
+
     db = DB(create, insert, args.debug)
     db.dump('A', get_data(args.path1))
     db.dump('B', get_data(args.path2))
@@ -150,15 +150,15 @@ def diff(args):
         lp.export('only a', db.only_a(), '< ')
         lp.export('only b', db.only_b(), '> ')
         lp.export('common', db.common(), '= ')
-    
+
     # Get ownership diff (user, group)
     if 2 not in args.supps:
         lp.export('diff owner', db.diff_owner(), '<o> ')
-    
+
     # Get access diff (rwx for users, groups and others)
     if 3 not in args.supps:
         lp.export('diff perm', db.diff_perms(), '<p> ')
-    
+
     # Get file size diff
     if 4 not in args.supps:
         lp.export('diff size', db.diff_size(), '<s> ')
@@ -183,18 +183,18 @@ def do_parser_stuff():
     parser = argparse.ArgumentParser()
 
     # Setup optional parameters
-    parser.add_argument('-d', '--debug', help='debug only', dest='debug', 
+    parser.add_argument('-d', '--debug', help='debug only', dest='debug',
         action='store_true', default=False)
-    parser.add_argument('-q', '--quiet', help='quiet output', dest='quiet', 
+    parser.add_argument('-q', '--quiet', help='quiet output', dest='quiet',
         action='store_true', default=False)
-    parser.add_argument('-1', help='supress path diffs', default=list(), 
+    parser.add_argument('-1', help='supress path diffs', default=list(),
         dest='supps', action='append_const', const=1)
-    parser.add_argument('-2', help='supress ownership diffs (user, group)', 
+    parser.add_argument('-2', help='supress ownership diffs (user, group)',
         dest='supps', action='append_const', const=2)
     parser.add_argument('-3', help=
-        'supress access diffs (rwx for users, groups and others)', 
+        'supress access diffs (rwx for users, groups and others)',
         dest='supps', action='append_const', const=3)
-    parser.add_argument('-4', help='supress file size diffs', dest='supps', 
+    parser.add_argument('-4', help='supress file size diffs', dest='supps',
         action='append_const', const=4)
 
     # Setup required parameters
@@ -212,7 +212,7 @@ def do_parser_stuff():
     if not check_params(args):
         parser.print_help()
         exit(-1)
-    
+
     return args
 
 if __name__ == '__main__':
